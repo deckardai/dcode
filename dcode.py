@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # coding: utf-8
 
-# Handles urls like code://xyz
+# Handles urls like dcode://my_project/some/path.py?l=1&c=1
 
 import sys
 import os
@@ -17,8 +17,8 @@ HOME = expanduser("~")
 CONFIG_FILE = join(HOME, '.dcode.json')
 
 # Add paths where editors are likely found
-print(os.environ['PATH'])
 os.environ['PATH'] += os.pathsep + '/usr/local/bin'
+print('PATH=' + os.environ['PATH'])
 
 if sys.platform == 'darwin':
     editorCommands = {
@@ -41,6 +41,7 @@ else:
 
 # Paths known to be repositories
 repoCache = None
+freshCache = False
 
 
 def enumerateRepos(home=None):
@@ -60,9 +61,10 @@ def enumerateRepos(home=None):
 
 
 def collectRepos(home=None, refresh=False):
-    global repoCache
+    global repoCache, freshCache
     if repoCache is None or refresh:
         repoCache = list(enumerateRepos(home))
+        freshCache = True
     return repoCache
 
 
@@ -123,7 +125,7 @@ def launchEditor(location):
 def openUrl(url):
     print('Opening ' + url)
     location = findRepoFromUrl(url)
-    if not location:
+    if not location and not freshCache:
         # Rescan and try again
         collectRepos(refresh=True)
         location = findRepoFromUrl(url)
