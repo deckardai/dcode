@@ -11,7 +11,9 @@ try:
     from urlparse import urlparse, parse_qs
 except:
     from urllib.parse import urlparse, parse_qs
+import json
 
+CONFIG_FILE = 'dcode.json'
 
 # Add paths where editors are likely found
 print(os.environ['PATH'])
@@ -131,7 +133,40 @@ def testOpen():
     openUrl('code://deckard/codebase/Makefile?line=2&column=4')
 
 
+def load():
+    try:
+        with open(CONFIG_FILE) as fd:
+            config = json.load(fd)
+    except:
+        config = {}
+    return config
+
+
+def save(config):
+    try:
+        with open(CONFIG_FILE, 'w') as fd:
+            json.dump(config, fd)
+    except Exception as e:
+        print(repr(e))
+    return config
+
+
+def init():
+    ' Load configuration file and populate the cache if available '
+    global repoCache
+    config = load()
+    repos = config.get('repositories')
+    if repos:
+        repoCache = repos
+    else:
+        config['repositories'] = collectRepos()
+    return config
+
+
 def main(argv):
+    ' Command line '
+    config = init()
+    save(config)
     if len(argv) >= 2:
         # Run once, from argument
         openUrl(argv[1])
