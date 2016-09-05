@@ -29,5 +29,18 @@
 	</dict>
 	<key>LSRequiresCarbon</key>
 	<true/>
+
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+	        <key>CFBundleURLName</key>
+	        <string>DCode</string>
+	        <key>CFBundleURLSchemes</key>
+	        <array>
+	            <string>dcode</string>
+	        </array>
+        </dict>
+	</array>
+
 </dict>
 </plist>
