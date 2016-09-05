@@ -5,7 +5,7 @@
 
 import sys
 import os
-from os.path import join, exists, normpath, basename
+from os.path import join, exists, normpath, basename, expanduser
 from subprocess import check_call
 try:
     from urlparse import urlparse, parse_qs
@@ -13,7 +13,8 @@ except:
     from urllib.parse import urlparse, parse_qs
 import json
 
-CONFIG_FILE = 'dcode.json'
+HOME = expanduser("~")
+CONFIG_FILE = join(HOME, '.dcode.json')
 
 # Add paths where editors are likely found
 print(os.environ['PATH'])
@@ -45,7 +46,7 @@ repoCache = None
 def enumerateRepos(home=None):
     ' Walk through HOME and yield git repositories. '
     if not home:
-        home = os.environ.get('HOME', '.')
+        home = HOME
     # Walk all directories
     for dirpath, childDirs, filenames in os.walk(home, topdown=True):
         # Skip hidden directories
