@@ -58,9 +58,9 @@ def enumerateRepos(home=None):
             yield dirpath
 
 
-def collectRepos(home=None):
+def collectRepos(home=None, refresh=False):
     global repoCache
-    if repoCache is None:
+    if repoCache is None or refresh:
         repoCache = list(enumerateRepos(home))
     return repoCache
 
@@ -122,10 +122,15 @@ def launchEditor(location):
 def openUrl(url):
     print('Opening ' + url)
     location = findRepoFromUrl(url)
-    print(location)
+    if not location:
+        # Rescan and try again
+        collectRepos(refresh=True)
+        location = findRepoFromUrl(url)
+
     if not location:
         print('E Not found')
     else:
+        print(location)
         launchEditor(location)
 
 
