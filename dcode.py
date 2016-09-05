@@ -88,11 +88,12 @@ def findRepoFromUrl(url):
     # Parse url and parameters
     purl = urlparse(url)
     params = parse_qs(purl.query)
-    if not purl.path:
+    path = purl.path.strip('/')
+    if not path:
         return None
 
     root = findRepoWithPath(
-        path=purl.path,
+        path=path,
         repoName=purl.hostname,
     )
     if root is None:
@@ -102,7 +103,7 @@ def findRepoFromUrl(url):
     cols = params.get('column') or params.get('c')
     location = {
         'root': root,
-        'path': purl.path,
+        'path': path,
         'line': lines[0] if lines else None,
         'column': cols[0] if cols else None,
     }
