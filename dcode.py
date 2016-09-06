@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # coding: utf-8
 
 # Handles urls like dcode://my_project/some/path.py?l=1&c=1
