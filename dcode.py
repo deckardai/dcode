@@ -21,6 +21,19 @@ os.environ['PATH'] += os.pathsep + '/usr/local/bin'
 print('PATH=' + os.environ['PATH'])
 
 if sys.platform == 'darwin':
+
+    def cmdVi(path):
+        return '''echo
+            'tell application "Terminal"
+                activate
+                do script ("vi {0}")
+            end tell'
+            | osascript -
+        '''.format(path)
+    
+    def cmdIdea(path):
+        return '"/Applications/IntelliJ IDEA.app/Contents/MacOS/idea" --line 1 ' + path
+
     editorCommands = {
         'atom': ['open', '-a', 'atom', '-n', '--args'],
         # vscode doesn't honor arguments from "open -a"
