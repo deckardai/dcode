@@ -1,6 +1,6 @@
 # dcode://
 
-This repo describes and implements a url scheme to share code.
+This repo describes and implements a URL scheme to share code.
 
 # Link-to-code
 
@@ -18,7 +18,7 @@ A dCode URL that contains a repository URL, commit ID, path, line and column num
 
 ## Human-friendly mode
 
-URLs may omit all parts but the path. This makes it easy to write them by hand or to generate from other tools. Handlers should make their best efforts to locate the code that best matches the URL.
+URLs may omit all parts but the path. This makes it easy to write them by hand or to generate them from other tools. Handlers should make their best efforts to locate the code that best matches the URL.
 
 
 # Specification
@@ -31,29 +31,29 @@ A dCode URL is composed of a mandatory path and optional repository and file inf
 
 `repo_name`: the common name of the repo, the last part of a repo url and typically the name of the local working directory.
 
-## Repository specification
-
 `repo_spec` can indicate version control details, such as branch names and commit ids.
 
-`git`: a URL that can be interpreted by git
+`code_spec` can indicate the location of code inside of a file.
 
-`hg`: a URL that can be interpreted by mercurial.
+## Repository specification
+
+`git`: a URL that can be interpreted by git. Must be URL-encoded.
+
+`hg`: a URL that can be interpreted by mercurial. Must be URL-encoded.
 
 `commit` or `h`: a specific commit hash.
 
-`branch` or `br`: a branch or tag.
+`branch` or `b`: a branch or tag.
 
-`date` or `dt`: a date as YYYY-MM-DD, representing the last commit of the day in UTC, in the specified or the default branch.
+`date` or `d`: a date as YYYY-MM-DD, representing the last commit of the day in UTC, in the specified or the default branch.
 
 ## Code specification
-
-`code_spec` can indicate the location of code inside of a file.
 
 `line` or `l`: line number starting at 1.
 
 `column` or `c`: column number starting at 1.
 
-`word` or `w`: one or more words that should appear at the URL location. Several words must be separated by commas.
+`word` or `w`: one or more words that should appear at the URL location. Several words can be given, separated by commas. This allows handlers to find code across changes.
 
 ## Name
 
