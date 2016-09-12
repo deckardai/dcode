@@ -12,9 +12,15 @@ try:
 except:
     from urllib.parse import urlparse, parse_qs
 import json
+from pprint import pprint
+from logging import warning
 
 HOME = expanduser("~")
 CONFIG_FILE = join(HOME, '.dcode.json')
+CONFIG_DEFAULTS = {
+    'editor': 'atom',
+}
+DEV = os.environ.get('DCODE_DEV')
 
 # Add paths where editors are likely found
 os.environ['PATH'] += os.pathsep + '/usr/local/bin'
@@ -22,20 +28,14 @@ print('PATH=' + os.environ['PATH'])
 
 if sys.platform == 'darwin':
     editorCommands = {
-        'atom': ['open', '-a', 'atom', '-n', '--args'],
+        'atom': "open -a atom -n --args '{pathLineColumn}'",
         # vscode doesn't honor arguments from "open -a"
-        'vscode': [
-            '/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code',
-            '--goto', '--reuse-window',
-        ],
+        'vscode': "'/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code' --goto --reuse-window '{pathLineColumn}'",
     }
 else:
     editorCommands = {
-        'atom': ['atom'],
-        # vscode doesn't honor arguments from "open -a"
-        'vscode': [
-            'code', '--goto', '--reuse-window',
-        ],
+        'atom': "atom '{pathLineColumn}'",
+        'vscode': "code --goto --reuse-window '{pathLineColumn}'",
     }
 
 
@@ -74,9 +74,14 @@ def findRepoWithPath(path, repoName=None):
         fullPath = root + '/' + path
         if exists(fullPath):
             if repoName and basename(root).lower() != repoName.lower():
-                print('W Repo name %s do not match %s', repoName, root)
+                print('W Repo name {0} do not match {1}'.format(repoName, root))
             return root
     return None
+
+
+def cleanPath(path):
+    ' Remove quotes from paths '
+    return path.replace('"', '').replace("'", '')
 
 
 def findRepoFromUrl(url):
@@ -104,26 +109,50 @@ def findRepoFromUrl(url):
     location = {
         'root': root,
         'path': path,
-        'line': lines[0] if lines else None,
-        'column': cols[0] if cols else None,
+        'line': lines[0] if lines else '',
+        'column': cols[0] if cols else '',
     }
     return location
 
 
-def launchEditor(location):
-    arg = location['root'] + '/' + location['path']
+def makeEditorCommand(config, location):
+    # Create path:line:column notation
+    # `line` and `column` are optional
+    fullPath = join(location['root'], location['path'])
+    withLine = fullPath
+    withColumn = fullPath
     if location['line']:
-        arg += ':' + location['line']
+        withLine += ':' + location['line']
+        withColumn = withLine
         if location['column']:
-            arg += ':' + location['column']
+            withColumn += ':' + location['column']
 
-    # TODO Use multiple PATH to support linux and mac
-    editor = 'atom'
-    cmd = editorCommands[editor] + [arg]
-    check_call(cmd)
+    # Find the command template
+    tpl = config.get('command')
+    if not tpl:
+        preset = config.get('editor')
+        if not preset:
+            raise ValueError('Could not make an editor command')
+
+        tpl = editorCommands[preset]
+
+    variables = dict(
+        root=cleanPath(location['root']),
+        path=cleanPath(location['path']),
+        line=location['line'],
+        column=location['column'],
+        fullPath=fullPath,
+        pathLine=withLine,
+        pathLineColumn=withColumn,
+    )
+    cmd = tpl.format(**variables)
+    if DEV:
+        pprint(variables)
+        print(cmd)
+    return cmd
 
 
-def openUrl(url):
+def openUrl(config, url):
     print('Opening ' + url)
     location = findRepoFromUrl(url)
     if not location and not freshCache:
@@ -134,20 +163,23 @@ def openUrl(url):
     if not location:
         print('E Not found')
     else:
-        print(location)
-        launchEditor(location)
+        cmd = makeEditorCommand(config, location)
+        prefix = 'echo ' if DEV else ''
+        check_call(prefix + cmd, shell=True)
 
 
 def testOpen():
-    openUrl('code://deckard/codebase/Makefile?line=2&column=4')
+    openUrl(load(), 'dcode://deckard/codebase/Makefile?line=2&column=4')
 
 
 def load():
+    config = {}
+    config.update(CONFIG_DEFAULTS)
     try:
         with open(CONFIG_FILE) as fd:
-            config = json.load(fd)
-    except:
-        config = {}
+            config.update(json.load(fd))
+    except Exception as e:
+        warning(repr(e)[:500])
     return config
 
 
@@ -176,14 +208,16 @@ def main(argv):
     ' Command line '
     config = init()
     save(config)
+    if DEV:
+        pprint(config)
     if len(argv) >= 2:
         # Run once, from argument
-        openUrl(argv[1])
+        openUrl(config, argv[1])
     else:
         # Run forever, from stdin
         while True:
             url = sys.stdin.readline().strip()
-            openUrl(url)
+            openUrl(config, url)
             sys.stdout.flush()
 
 if __name__ == '__main__':
