@@ -186,7 +186,10 @@ def load():
 def save(config):
     try:
         with open(CONFIG_FILE, 'w') as fd:
-            json.dump(config, fd)
+            json.dump(
+                config, fd,
+                sort_keys=True, indent=4, separators=(',', ': '),
+            )
     except Exception as e:
         print(repr(e))
     return config
