@@ -26,7 +26,7 @@ Absolute minimum. When referring to a file, simply add "dcode colon triple slash
 
     dcode:///some_pretty_specific/filename.js
 
-If the path is not unique enough (like README), add the repo name between the slashes:
+If the path is not unique enough (like main.js), add the repo name between the slashes:
 
     dcode://my_project/main.js
 
