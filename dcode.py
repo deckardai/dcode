@@ -14,6 +14,7 @@ except:
 import json
 from pprint import pprint
 from logging import warning
+from time import sleep
 
 HOME = expanduser("~")
 CONFIG_FILE = join(HOME, '.dcode.json')
@@ -219,12 +220,13 @@ def main(argv):
     else:
         # Run forever, from stdin
         while True:
+            url = sys.stdin.readline().strip()
             try:
-                url = sys.stdin.readline().strip()
                 openUrl(config, url)
-                sys.stdout.flush()
             except Exception as e:
                 warning(repr(e)[:500])
+            sys.stdout.flush()
+            sleep(0.1)
 
 if __name__ == '__main__':
     main(sys.argv)
