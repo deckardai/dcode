@@ -107,11 +107,13 @@ def findRepoFromUrl(url):
 
     lines = params.get('line') or params.get('l')
     cols = params.get('column') or params.get('c')
+    editors = params.get('editor')
     location = {
         'root': root,
         'path': path,
         'line': lines[0] if lines else '',
         'column': cols[0] if cols else '',
+        'editor': editors[0] if editors else '',
     }
     return location
 
@@ -128,14 +130,23 @@ def makeEditorCommand(config, location):
         if location['column']:
             withColumn += ':' + location['column']
 
-    # Find the command template
-    tpl = config.get('command')
+    # Find the command template...
+    # ...in the url itself
+    preset = location.get('editor', '')
+    tpl = editorCommands.get(preset)
+    if preset and not tpl:
+        warning('Unknown editor "%s"' % preset)
+    # ...as a custom command
+    if not tpl:
+        preset = ''
+        tpl = config.get('command')
+    # ...as a preset
     if not tpl:
         preset = config.get('editor')
-        if not preset:
-            raise ValueError('Could not make an editor command')
+        tpl = editorCommands.get(preset)
 
-        tpl = editorCommands[preset]
+    if not tpl:
+        raise ValueError('Could not make an editor command')
 
     variables = dict(
         root=cleanPath(location['root']),
