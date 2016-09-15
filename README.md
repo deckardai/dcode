@@ -88,7 +88,7 @@ A name or comment can be added at the end of URLs like this: `#--Some_name`. Thi
 
 # Implementation
 
-The current implementation looks for all git or mercurial repositories in the home directory, by default. It can open files at the right place in any code editor. Presets for popular setups are provided.
+The current implementation looks for all git or mercurial repositories in the home directory, by default. It can open files at the right place in any code editor. A couple of presets are provided. Contributions welcome!
 
 
 # Install
