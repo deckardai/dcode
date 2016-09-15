@@ -19,6 +19,7 @@ from time import sleep
 HOME = expanduser("~")
 CONFIG_FILE = join(HOME, '.dcode.json')
 CONFIG_DEFAULTS = {
+    'command': '',
     'editor': 'system',
 }
 DEV = os.environ.get('DCODE_DEV')
@@ -40,6 +41,15 @@ else:
         'system': "xdg-open '{path}'",
         'vscode': "code --goto --reuse-window '{pathLineColumn}'",
     }
+
+# Add documentation to the config file
+CONFIG_EXTRAS = {
+    '_doc': (
+        'Choose an editor preset, or specify a command template. '
+        'The following parameters are currently supported: {path} {line} {column}'
+    ),
+    '_editors_available': list(sorted(editorCommands.keys())),
+}
 
 
 # Paths known to be repositories
@@ -201,7 +211,8 @@ def save(config):
     try:
         with open(CONFIG_FILE, 'w') as fd:
             json.dump(
-                config, fd,
+                dict(config, **CONFIG_EXTRAS),
+                fd,
                 sort_keys=True, indent=4, separators=(',', ': '),
             )
     except Exception as e:
