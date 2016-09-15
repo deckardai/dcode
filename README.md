@@ -107,4 +107,4 @@ DCode will likely select a basic text editor.
 
 Edit `~/.dcode.json` to choose your actual IDE.
 
-You should now be able to clicks links like on this [test page](tests/some_file.html) and end up right in your text editor.
+You should now be able to click links, like on this [test page](tests/some_file.html), and end up right in your text editor.
