@@ -162,10 +162,10 @@ def makeEditorCommand(config, location):
 
     variables = dict(
         root=cleanPath(location['root']),
-        path=cleanPath(location['path']),
+        relPath=cleanPath(location['path']),
+        path=fullPath,
         line=location['line'],
         column=location['column'],
-        fullPath=fullPath,
         pathLine=withLine,
         pathLineColumn=withColumn,
     )
