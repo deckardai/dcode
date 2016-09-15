@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# Handles urls like dcode://my_project/some/path.py?l=1&c=1
+'''
+dCode handles urls like this:
+
+    dcode.py dcode://my_project/some/path.py?l=1&c=1
+'''
 
 import sys
 import os
@@ -234,14 +238,17 @@ def init():
 
 def main(argv=sys.argv):
     ' Command line '
+
+    if len(argv) < 2:
+        print(__doc__)
+        sys.exit(1)
+
     config = init()
     save(config)
     if DEV:
         pprint(config)
-    if len(argv) >= 2:
-        # Run once, from argument
-        openUrl(config, argv[1])
-    else:
+
+    if argv[1] == '-':
         # Run forever, from stdin
         while True:
             url = sys.stdin.readline().strip()
@@ -252,6 +259,9 @@ def main(argv=sys.argv):
             sys.stdout.flush()
             sleep(0.1)
 
+    else:
+        # Run once, from argument
+        openUrl(config, argv[1])
 
 if __name__ == '__main__':
     main()
