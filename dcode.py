@@ -19,7 +19,7 @@ from time import sleep
 HOME = expanduser("~")
 CONFIG_FILE = join(HOME, '.dcode.json')
 CONFIG_DEFAULTS = {
-    'editor': 'atom',
+    'editor': 'system',
 }
 DEV = os.environ.get('DCODE_DEV')
 
@@ -30,12 +30,14 @@ print('PATH=' + os.environ['PATH'])
 if sys.platform == 'darwin':
     editorCommands = {
         'atom': "open -a atom -n --args '{pathLineColumn}'",
+        'system': "open '{path}'",
         # vscode doesn't honor arguments from "open -a"
         'vscode': "'/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code' --goto --reuse-window '{pathLineColumn}'",
     }
 else:
     editorCommands = {
         'atom': "atom '{pathLineColumn}'",
+        'system': "xdg-open '{path}'",
         'vscode': "code --goto --reuse-window '{pathLineColumn}'",
     }
 
@@ -219,7 +221,7 @@ def init():
     return config
 
 
-def main(argv):
+def main(argv=sys.argv):
     ' Command line '
     config = init()
     save(config)
@@ -239,5 +241,6 @@ def main(argv):
             sys.stdout.flush()
             sleep(0.1)
 
+
 if __name__ == '__main__':
-    main(sys.argv)
+    main()
