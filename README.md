@@ -95,10 +95,18 @@ The current implementation looks for all git or mercurial repositories in the ho
 
     git clone https://github.com/deckardai/dcode.git
     cd dcode
-    make build-mac start-mac
 
-This will install the url handler.
+    # For Linux
+    make install-linux test-linux
 
-You should then be able to click links like this one and end up right in your text editor:
+    # For Mac
+    make install-mac test-mac
+
+This will install the url handler and open a test file after a few seconds.
+DCode will likely select a basic text editor.
+
+Edit `~/.dcode.json` to choose your actual IDE.
+
+You should then be able to open links like this one and end up right in your text editor. Try copying this into your browser's address bar:
 
 [dcode://dcode/tests/some_file?l=3&c=30](dcode://dcode/tests/some_file?l=3&c=30)
