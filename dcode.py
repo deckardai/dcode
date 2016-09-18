@@ -81,17 +81,41 @@ def collectRepos(home=None, refresh=False):
     global repoCache, freshCache
     if repoCache is None or refresh:
         repoCache = list(enumerateRepos(home))
+        repoCache.sort(key=len)  # Prioritize shorter paths
         freshCache = True
     return repoCache
 
 
+def sortReposForName(roots, name):
+    ' Reorder the roots by closeness to the name'
+    def distance(root):
+        folder = basename(root)
+        if name == folder:
+            return 0
+        fl = folder.lower()
+        nl = name.lower()
+        if nl == fl:
+            return 1
+        if nl in fl:
+            return 1 + len(fl) - len(nl)
+        if fl in nl:
+            return 1 + len(nl) - len(fl)
+        if nl in root.lower():
+            return 1 + len(root)
+        return 1000
+    return sorted(roots, key=distance)
+
+
 def findRepoWithPath(path, repoName=None):
     ' Find a repo that contains this path. '
-    for root in collectRepos():
+    roots = collectRepos()
+    if repoName:
+        roots = sortReposForName(roots, repoName)
+    for root in roots:
         fullPath = root + '/' + path
         if exists(fullPath):
             if repoName and basename(root).lower() != repoName.lower():
-                print('W Repo name {0} do not match {1}'.format(repoName, root))
+                print('W Repo name {0} does not match {1}'.format(repoName, root))
             return root
     return None
 
