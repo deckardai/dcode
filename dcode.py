@@ -275,7 +275,12 @@ def main(argv=sys.argv):
     if argv[1] == '-':
         # Run forever, from stdin
         while True:
-            url = sys.stdin.readline().strip()
+            line = sys.stdin.readline()
+            if not line:
+                break
+            url = line.strip()
+            if not url:
+                continue
             try:
                 openUrl(config, url)
             except Exception as e:
