@@ -51,12 +51,14 @@ if sys.platform == 'darwin':
         'system': "open '{path}'",
         # vscode doesn't honor arguments from "open -a"
         'vscode': "'/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code' --goto --reuse-window '{pathLineColumn}'",
+        'idea': "idea '{pathLine}'",
     }
 else:
     editorCommands = {
         'atom': "atom '{pathLineColumn}'",
         'system': "xdg-open '{path}'",
         'vscode': "code --goto --reuse-window '{pathLineColumn}'",
+        'idea': "idea '{pathLine}'",
     }
 
 # Add documentation to the config file
