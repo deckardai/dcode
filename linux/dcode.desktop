@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=dCode link handler
+Comment=dCode link handler
+MimeType=x-scheme-handler/dcode;
+X-KDE-Protocols=dcode
+Exec=sh -c '$HOME/.local/bin/dcode.py %U'
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Icon=
+Terminal=false
+StartupNotify=false

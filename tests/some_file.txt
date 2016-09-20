@@ -3,3 +3,8 @@ Did this file just open itself?
 Is your cursor right here? [  ]
 
 It works!
+
+
+
+
+Otherwise, edit `~/.dcode.json` to choose your actual IDE.

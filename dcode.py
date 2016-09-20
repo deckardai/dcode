@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# Handles urls like dcode://my_project/some/path.py?l=1&c=1
+'''
+dCode handles urls like this:
+
+    dcode.py dcode://my_project/some/path.py?l=1&c=1
+'''
 
 import sys
 import os
@@ -12,9 +16,17 @@ try:
 except:
     from urllib.parse import urlparse, parse_qs
 import json
+from pprint import pprint
+from logging import warning
+from time import sleep
 
 HOME = expanduser("~")
 CONFIG_FILE = join(HOME, '.dcode.json')
+CONFIG_DEFAULTS = {
+    'command': '',
+    'editor': 'system',
+}
+DEV = os.environ.get('DCODE_DEV')
 
 # Add paths where editors are likely found
 os.environ['PATH'] += os.pathsep + '/usr/local/bin'
@@ -35,21 +47,26 @@ if sys.platform == 'darwin':
         return '"/Applications/IntelliJ IDEA.app/Contents/MacOS/idea" --line 1 ' + path
 
     editorCommands = {
-        'atom': ['open', '-a', 'atom', '-n', '--args'],
+        'atom': "open -a atom -n --args '{pathLineColumn}'",
+        'system': "open '{path}'",
         # vscode doesn't honor arguments from "open -a"
-        'vscode': [
-            '/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code',
-            '--goto', '--reuse-window',
-        ],
+        'vscode': "'/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code' --goto --reuse-window '{pathLineColumn}'",
     }
 else:
     editorCommands = {
-        'atom': ['atom'],
-        # vscode doesn't honor arguments from "open -a"
-        'vscode': [
-            'code', '--goto', '--reuse-window',
-        ],
+        'atom': "atom '{pathLineColumn}'",
+        'system': "xdg-open '{path}'",
+        'vscode': "code --goto --reuse-window '{pathLineColumn}'",
     }
+
+# Add documentation to the config file
+CONFIG_EXTRAS = {
+    '_doc': (
+        'Choose an editor preset, or specify a command template. '
+        'The following parameters are currently supported: {path} {line} {column}'
+    ),
+    '_editors_available': list(sorted(editorCommands.keys())),
+}
 
 
 # Paths known to be repositories
@@ -77,19 +94,48 @@ def collectRepos(home=None, refresh=False):
     global repoCache, freshCache
     if repoCache is None or refresh:
         repoCache = list(enumerateRepos(home))
+        repoCache.sort(key=len)  # Prioritize shorter paths
         freshCache = True
     return repoCache
 
 
+def sortReposForName(roots, name):
+    ' Reorder the roots by closeness to the name'
+    def distance(root):
+        folder = basename(root)
+        if name == folder:
+            return 0
+        fl = folder.lower()
+        nl = name.lower()
+        if nl == fl:
+            return 1
+        if nl in fl:
+            return 1 + len(fl) - len(nl)
+        if fl in nl:
+            return 1 + len(nl) - len(fl)
+        if nl in root.lower():
+            return 1 + len(root)
+        return 1000
+    return sorted(roots, key=distance)
+
+
 def findRepoWithPath(path, repoName=None):
     ' Find a repo that contains this path. '
-    for root in collectRepos():
+    roots = collectRepos()
+    if repoName:
+        roots = sortReposForName(roots, repoName)
+    for root in roots:
         fullPath = root + '/' + path
         if exists(fullPath):
             if repoName and basename(root).lower() != repoName.lower():
-                print('W Repo name %s do not match %s', repoName, root)
+                print('W Repo name {0} does not match {1}'.format(repoName, root))
             return root
     return None
+
+
+def cleanPath(path):
+    ' Remove quotes from paths '
+    return path.replace('"', '').replace("'", '')
 
 
 def findRepoFromUrl(url):
@@ -114,29 +160,64 @@ def findRepoFromUrl(url):
 
     lines = params.get('line') or params.get('l')
     cols = params.get('column') or params.get('c')
+    editors = params.get('editor')
     location = {
         'root': root,
         'path': path,
-        'line': lines[0] if lines else None,
-        'column': cols[0] if cols else None,
+        'line': lines[0] if lines else '',
+        'column': cols[0] if cols else '',
+        'editor': editors[0] if editors else '',
     }
     return location
 
 
-def launchEditor(location):
-    arg = location['root'] + '/' + location['path']
+def makeEditorCommand(config, location):
+    # Create path:line:column notation
+    # `line` and `column` are optional
+    fullPath = join(location['root'], location['path'])
+    withLine = fullPath
+    withColumn = fullPath
     if location['line']:
-        arg += ':' + location['line']
+        withLine += ':' + location['line']
+        withColumn = withLine
         if location['column']:
-            arg += ':' + location['column']
+            withColumn += ':' + location['column']
 
-    # TODO Use multiple PATH to support linux and mac
-    editor = 'atom'
-    cmd = editorCommands[editor] + [arg]
-    check_call(cmd)
+    # Find the command template...
+    # ...in the url itself
+    preset = location.get('editor', '')
+    tpl = editorCommands.get(preset)
+    if preset and not tpl:
+        warning('Unknown editor "%s"' % preset)
+    # ...as a custom command
+    if not tpl:
+        preset = ''
+        tpl = config.get('command')
+    # ...as a preset
+    if not tpl:
+        preset = config.get('editor')
+        tpl = editorCommands.get(preset)
+
+    if not tpl:
+        raise ValueError('Could not make an editor command')
+
+    variables = dict(
+        root=cleanPath(location['root']),
+        relPath=cleanPath(location['path']),
+        path=fullPath,
+        line=location['line'],
+        column=location['column'],
+        pathLine=withLine,
+        pathLineColumn=withColumn,
+    )
+    cmd = tpl.format(**variables)
+    if DEV:
+        pprint(variables)
+        print(cmd)
+    return cmd
 
 
-def openUrl(url):
+def openUrl(config, url):
     print('Opening ' + url)
     location = findRepoFromUrl(url)
     if not location and not freshCache:
@@ -147,27 +228,34 @@ def openUrl(url):
     if not location:
         print('E Not found')
     else:
-        print(location)
-        launchEditor(location)
+        cmd = makeEditorCommand(config, location)
+        prefix = 'echo ' if DEV else ''
+        check_call(prefix + cmd, shell=True)
 
 
 def testOpen():
-    openUrl('code://deckard/codebase/Makefile?line=2&column=4')
+    openUrl(load(), 'dcode://deckard/codebase/Makefile?line=2&column=4')
 
 
 def load():
+    config = {}
+    config.update(CONFIG_DEFAULTS)
     try:
         with open(CONFIG_FILE) as fd:
-            config = json.load(fd)
-    except:
-        config = {}
+            config.update(json.load(fd))
+    except Exception as e:
+        warning(repr(e)[:500])
     return config
 
 
 def save(config):
     try:
         with open(CONFIG_FILE, 'w') as fd:
-            json.dump(config, fd)
+            json.dump(
+                dict(config, **CONFIG_EXTRAS),
+                fd,
+                sort_keys=True, indent=4, separators=(',', ': '),
+            )
     except Exception as e:
         print(repr(e))
     return config
@@ -185,19 +273,37 @@ def init():
     return config
 
 
-def main(argv):
+def main(argv=sys.argv):
     ' Command line '
+
+    if len(argv) < 2:
+        print(__doc__)
+        sys.exit(1)
+
     config = init()
     save(config)
-    if len(argv) >= 2:
-        # Run once, from argument
-        openUrl(argv[1])
-    else:
+    if DEV:
+        pprint(config)
+
+    if argv[1] == '-':
         # Run forever, from stdin
         while True:
-            url = sys.stdin.readline().strip()
-            openUrl(url)
+            line = sys.stdin.readline()
+            if not line:
+                break
+            url = line.strip()
+            if not url:
+                continue
+            try:
+                openUrl(config, url)
+            except Exception as e:
+                warning(repr(e)[:500])
             sys.stdout.flush()
+            sleep(0.1)
+
+    else:
+        # Run once, from argument
+        openUrl(config, argv[1])
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main()
