@@ -262,10 +262,10 @@ def init():
     return config
 
 
-def main(argv=sys.argv):
+def main(args):
     ' Command line '
 
-    if len(argv) < 2:
+    if len(args) < 1:
         print(__doc__)
         sys.exit(1)
 
@@ -274,7 +274,7 @@ def main(argv=sys.argv):
     if DEV:
         pprint(config)
 
-    if argv[1] == '-':
+    if args[0] == '-':
         # Run forever, from stdin
         while True:
             line = sys.stdin.readline()
@@ -292,7 +292,7 @@ def main(argv=sys.argv):
 
     else:
         # Run once, from argument
-        openUrl(config, argv[1])
+        openUrl(config, args[0])
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])
