@@ -32,21 +32,32 @@ DEV = os.environ.get('DCODE_DEV')
 os.environ['PATH'] += os.pathsep + '/usr/local/bin'
 print('PATH=' + os.environ['PATH'])
 
+
+editorCommands = {
+    # IntelliJ editors
+    'androidstudio': "studio '{pathLine}'",
+    'appcode': "appcode '{pathLine}'",
+    'clion': "clion '{pathLine}'",
+    'idea': "idea '{pathLine}'",
+    'phpstorm': "pstorm '{pathLine}'",
+    'pycharm': "charm '{pathLine}'",
+    'rubymine': "mine '{pathLine}'",
+    'webstorm': "wstorm '{pathLine}'",
+}
+
 if sys.platform == 'darwin':
-    editorCommands = {
+    editorCommands.update({
         'atom': "open -a atom -n --args '{pathLineColumn}'",
         'system': "open '{path}'",
         # vscode doesn't honor arguments from "open -a"
         'vscode': "'/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code' --goto --reuse-window '{pathLineColumn}'",
-        'idea': "idea '{pathLine}'",
-    }
+    })
 else:
-    editorCommands = {
+    editorCommands.update({
         'atom': "atom '{pathLineColumn}'",
         'system': "xdg-open '{path}'",
         'vscode': "code --goto --reuse-window '{pathLineColumn}'",
-        'idea': "idea '{pathLine}'",
-    }
+    })
 
 # Add documentation to the config file
 CONFIG_EXTRAS = {
