@@ -105,7 +105,9 @@ The current implementation looks for all git or mercurial repositories in the ho
 This will install the url handler and open a test file after a few seconds.
 DCode will likely select a basic text editor.
 
-Edit `~/.dcode.json` to choose your actual IDE.
+# Configure
+
+    Edit `~/.dcode.json` to choose your actual IDE.
 
 You should now be able to click links and end up right in your text editor.
 
