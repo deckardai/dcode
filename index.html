@@ -138,7 +138,7 @@
 <p>The current implementation looks for all git or mercurial repositories in the home directory, by default. It can open files at the right place in any code editor. A couple of presets are provided. Contributions welcome!</p>
 
 <h1>
-<a id="install" class="anchor" href="#install" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Install</h1>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h1>
 
 <pre><code>git clone https://github.com/deckardai/dcode.git
 cd dcode
@@ -153,9 +153,15 @@ make install-mac test-mac
 <p>This will install the url handler and open a test file after a few seconds.
 DCode will likely select a basic text editor.</p>
 
-<p>Edit <code>~/.dcode.json</code> to choose your actual IDE.</p>
+<h1>
+<a id="configuration" class="anchor" href="#configuration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Configuration</h1>
 
-<p>You should now be able to click links and end up right in your text editor. Example link: <a href="dcode://dcode/tests/some_file.txt?l=3&c=30">dcode://dcode/tests/some_file.txt?l=3&amp;c=30</a>.</p>
+<pre><code>Edit `~/.dcode.json` to choose your actual IDE.
+</code></pre>
+
+<p>You should now be able to click links and end up right in your text editor.</p>
+
+<p>Example link: dcode://dcode/tests/some_file.txt?l=3&amp;c=30</p>
         </section>
 
         <footer>
