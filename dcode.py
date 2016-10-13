@@ -9,7 +9,7 @@ dCode handles urls like this:
 
 import sys
 import os
-from os.path import join, exists, normpath, basename, expanduser
+from os.path import join, exists, basename, expanduser
 from subprocess import check_call
 try:
     from urlparse import urlparse, parse_qs
@@ -45,12 +45,17 @@ editorCommands = {
     'webstorm': "wstorm '{pathLine}'",
 }
 
+# Vim
 def renderVimCommand(editor='', **variables):
-    parts = editor.split(':')
     tpl = "{vim} {server} --remote-tab-silent '+call cursor({line},{column})' '{path}'"
+    parts = editor.split(':')
+    vim = parts[0]
     server = parts[1] if len(parts) >= 2 else ""
+    if not server:
+        # No server specified, must open vim in a graphical window
+        vim = "gvim"
     cmd = tpl.format(
-        vim=parts[0],
+        vim=vim,
         server=("--servername '" + server + "'") if server else "",
         **variables
     )
@@ -60,6 +65,7 @@ editorCommands['vim'] = renderVimCommand
 editorCommands['gvim'] = renderVimCommand
 editorCommands['nvim'] = renderVimCommand
 
+# Atom, VSCode, ...
 if sys.platform == 'darwin':
     editorCommands.update({
         'atom': "open -a atom -n --args '{pathLineColumn}'",
