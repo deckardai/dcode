@@ -112,3 +112,16 @@ DCode will likely select a basic text editor.
 You should now be able to click links and end up right in your text editor.
 
 Example link: [dcode://dcode/tests/some_file.txt?l=3&c=30](dcode://dcode/tests/some_file.txt?l=3&c=30)
+
+
+# Contributing
+
+Ideas and bug reports are welcome in *Issues*, or code as pull requests.
+
+Examples:
+
+* Adding support for a new editor.
+
+* Make something more robust in a particular environment.
+
+* Make URLs more robust to code changes, multiple branches, and such.
