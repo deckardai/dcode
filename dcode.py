@@ -43,6 +43,7 @@ editorCommands = {
     'pycharm': "charm '{pathLine}'",
     'rubymine': "mine '{pathLine}'",
     'webstorm': "wstorm '{pathLine}'",
+    'vim': "gvim --remote-tab-silent '+call cursor({line},{column})' '{path}'",
 }
 
 if sys.platform == 'darwin':
@@ -158,17 +159,33 @@ def findRepoFromUrl(url):
     if root is None:
         return None
 
+    def listToInt(strings):
+        if not strings:
+            return 0
+        s = strings[0]
+        if not s.isdigit():
+            return 0
+        return int(s)
+
     lines = params.get('line') or params.get('l')
     cols = params.get('column') or params.get('c')
     editors = params.get('editor')
     location = {
         'root': root,
         'path': path,
-        'line': lines[0] if lines else '',
-        'column': cols[0] if cols else '',
+        'line': listToInt(lines),
+        'column': listToInt(cols),
         'editor': editors[0] if editors else '',
     }
     return location
+
+
+def renderEditorCommand(tpl, vars):
+    " Format tpl if it's a string, or call it if it's a function "
+    if hasattr(tpl, '__call__'):
+        return tpl(**vars)
+    else:
+        return tpl.format(**vars)
 
 
 def makeEditorCommand(config, location):
@@ -178,10 +195,10 @@ def makeEditorCommand(config, location):
     withLine = fullPath
     withColumn = fullPath
     if location['line']:
-        withLine += ':' + location['line']
+        withLine += ':' + str(location['line'])
         withColumn = withLine
         if location['column']:
-            withColumn += ':' + location['column']
+            withColumn += ':' + str(location['column'])
 
     # Find the command template...
     # ...in the url itself
@@ -204,13 +221,14 @@ def makeEditorCommand(config, location):
     variables = dict(
         root=cleanPath(location['root']),
         relPath=cleanPath(location['path']),
-        path=fullPath,
+        path=cleanPath(fullPath),
         line=location['line'],
         column=location['column'],
         pathLine=withLine,
         pathLineColumn=withColumn,
+        editor=preset,
     )
-    cmd = tpl.format(**variables)
+    cmd = renderEditorCommand(tpl, variables)
     if DEV:
         pprint(variables)
         print(cmd)
