@@ -43,8 +43,22 @@ editorCommands = {
     'pycharm': "charm '{pathLine}'",
     'rubymine': "mine '{pathLine}'",
     'webstorm': "wstorm '{pathLine}'",
-    'vim': "gvim --remote-tab-silent '+call cursor({line},{column})' '{path}'",
 }
+
+def renderVimCommand(editor='', **variables):
+    parts = editor.split(':')
+    tpl = "{vim} {server} --remote-tab-silent '+call cursor({line},{column})' '{path}'"
+    server = parts[1] if len(parts) >= 2 else ""
+    cmd = tpl.format(
+        vim=parts[0],
+        server=("--servername '" + server + "'") if server else "",
+        **variables
+    )
+    return cmd
+
+editorCommands['vim'] = renderVimCommand
+editorCommands['gvim'] = renderVimCommand
+editorCommands['nvim'] = renderVimCommand
 
 if sys.platform == 'darwin':
     editorCommands.update({
@@ -134,7 +148,7 @@ def findRepoWithPath(path, repoName=None):
     return None
 
 
-def cleanPath(path):
+def cleanQuotes(path):
     ' Remove quotes from paths '
     return path.replace('"', '').replace("'", '')
 
@@ -180,12 +194,12 @@ def findRepoFromUrl(url):
     return location
 
 
-def renderEditorCommand(tpl, vars):
+def renderEditorCommand(tpl, variables):
     " Format tpl if it's a string, or call it if it's a function "
     if hasattr(tpl, '__call__'):
-        return tpl(**vars)
+        return tpl(**variables)
     else:
-        return tpl.format(**vars)
+        return tpl.format(**variables)
 
 
 def makeEditorCommand(config, location):
@@ -202,7 +216,8 @@ def makeEditorCommand(config, location):
 
     # Find the command template...
     # ...in the url itself
-    preset = location.get('editor', '')
+    editor = location.get('editor', '')
+    preset = editor.split(':')[0]
     tpl = editorCommands.get(preset)
     if preset and not tpl:
         warning('Unknown editor "%s"' % preset)
@@ -212,21 +227,22 @@ def makeEditorCommand(config, location):
         tpl = config.get('command')
     # ...as a preset
     if not tpl:
-        preset = config.get('editor')
+        editor = config.get('editor', '')
+        preset = editor.split(':')[0]
         tpl = editorCommands.get(preset)
 
     if not tpl:
         raise ValueError('Could not make an editor command')
 
     variables = dict(
-        root=cleanPath(location['root']),
-        relPath=cleanPath(location['path']),
-        path=cleanPath(fullPath),
+        root=cleanQuotes(location['root']),
+        relPath=cleanQuotes(location['path']),
+        path=cleanQuotes(fullPath),
         line=location['line'],
         column=location['column'],
         pathLine=withLine,
         pathLineColumn=withColumn,
-        editor=preset,
+        editor=cleanQuotes(editor),
     )
     cmd = renderEditorCommand(tpl, variables)
     if DEV:
