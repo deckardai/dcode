@@ -172,10 +172,16 @@ def findRepoFromUrl(url):
     if not path:
         return None
 
-    root = findRepoWithPath(
-        path=path,
-        repoName=purl.hostname,
-    )
+    roots = params.get('root')
+    if roots:
+        # root from the url
+        root = roots[0]
+    else:
+        # Autodetect root
+        root = findRepoWithPath(
+            path=path,
+            repoName=purl.hostname,
+        )
     if root is None:
         return None
 
