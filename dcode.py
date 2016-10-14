@@ -154,6 +154,14 @@ def findRepoWithPath(path, repoName=None):
     return None
 
 
+def findRepoWithRoot(root, path):
+    ' Check if the root contains the path. '
+    fullPath = root + '/' + path
+    if exists(fullPath):
+        return root
+    return None
+
+
 def cleanQuotes(path):
     ' Remove quotes from paths '
     return path.replace('"', '').replace("'", '')
@@ -172,16 +180,21 @@ def findRepoFromUrl(url):
     if not path:
         return None
 
-    roots = params.get('root')
-    if roots:
-        # root from the url
-        root = roots[0]
-    else:
-        # Autodetect root
+    root = None
+    # Try the root from the url
+    urlRoots = params.get('root')
+    if urlRoots:
+        root = findRepoWithRoot(
+            root=urlRoots[0],
+            path=path,
+        )
+    # Otherwise autodetect the root
+    if root is None:
         root = findRepoWithPath(
             path=path,
             repoName=purl.hostname,
         )
+    # Not found
     if root is None:
         return None
 
