@@ -43,6 +43,7 @@ editorCommands = {
     'pycharm': "charm '{pathLine}'",
     'rubymine': "mine '{pathLine}'",
     'webstorm': "wstorm '{pathLine}'",
+    'xcode': "open '{pathLine}'",
 }
 
 # Vim
