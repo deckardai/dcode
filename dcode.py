@@ -85,7 +85,8 @@ else:
 CONFIG_EXTRAS = {
     '_doc': (
         'Choose an editor preset, or specify a command template. '
-        'The following parameters are currently supported: {path} {line} {column}'
+        'The following parameters are currently supported: {path} {pathLine} {pathLineColumn}. '
+        'The path and numbers render as path:12:34 '
     ),
     '_editors_available': list(sorted(editorCommands.keys())),
 }
@@ -178,8 +179,6 @@ def findRepoFromUrl(url):
     purl = urlparse(url)
     params = parse_qs(purl.query)
     path = purl.path.strip('/')
-    if not path:
-        return None
 
     root = None
     # Try the root from the url
