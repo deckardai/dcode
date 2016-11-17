@@ -230,7 +230,7 @@ def renderEditorCommand(tpl, variables):
 def makeEditorCommand(config, location):
     # Create path:line:column notation
     # `line` and `column` are optional
-    fullPath = join(location['root'], location['path'])
+    fullPath = join(location['root'], location['path']).rstrip('/')
     withLine = fullPath
     withColumn = fullPath
     if location['line']:
