@@ -20,6 +20,8 @@ from pprint import pprint
 from logging import warning
 from time import sleep
 
+import templates
+
 HOME = expanduser("~")
 CONFIG_FILE = join(HOME, '.dcode.json')
 CONFIG_DEFAULTS = {
@@ -32,7 +34,7 @@ DEV = os.environ.get('DCODE_DEV')
 os.environ['PATH'] += os.pathsep + '/usr/local/bin'
 print('PATH=' + os.environ['PATH'])
 
-
+# Source code template
 editorCommands = {
     # IntelliJ editors
     'androidstudio': "studio '{pathLine}'",
@@ -44,6 +46,11 @@ editorCommands = {
     'rubymine': "mine '{pathLine}'",
     'webstorm': "wstorm '{pathLine}'",
     'xcode': "open -a xcode --args '{path}'",
+}
+
+# All dcode templates
+commandTemplates = {
+"software-development": editorCommands
 }
 
 # Vim
@@ -243,7 +250,7 @@ def makeEditorCommand(config, location):
     # ...in the url itself
     editor = location.get('editor', '')
     preset = editor.split(':')[0]
-    tpl = editorCommands.get(preset)
+    tpl = commandTemplates["software-development"].get(preset)
     if preset and not tpl:
         warning('Unknown editor "%s"' % preset)
     # ...as a custom command
@@ -254,7 +261,7 @@ def makeEditorCommand(config, location):
     if not tpl:
         editor = config.get('editor', '')
         preset = editor.split(':')[0]
-        tpl = editorCommands.get(preset)
+        tpl = commandTemplates["software-development"].get(preset)
 
     if not tpl:
         raise ValueError('Could not make an editor command')
