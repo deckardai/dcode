@@ -1,6 +1,6 @@
 # dcode://
 
-This repo describes and implements a URL scheme to share code.
+Dcode is a URL scheme for sharing code.
 
 # Link-to-code
 
@@ -14,7 +14,7 @@ URLs support different degrees of precision and are capable of describing what a
 
 ## Strict mode
 
-A dCode URL that contains a repository URL, commit ID, path, line and column numbers uniquely identifies a location. It may still contain other details for readability, or to allow friendly alternative behaviors of handlers.
+A dCode URL that contains a repository URL, commit ID, path, line and column numbers uniquely identifies a location. It may also contain other details for readability, or to allow friendly alternative behaviors of handlers.
 
 ## Human-friendly mode
 
@@ -113,6 +113,9 @@ You should now be able to click links and end up right in your text editor.
 
 Example link: [dcode://dcode/tests/some_file.txt?l=3&c=30](dcode://dcode/tests/some_file.txt?l=3&c=30)
 
+# Test
+    # Using line number, word and editor in this example :-)
+    python dcode.py "dcode://path/to/file/filename?l=19&w=dcode&editor=atom"
 
 # Contributing
 
