@@ -332,8 +332,11 @@ def init():
     return config
 
 
-def main(args):
+def main(args=None):
     ' Command line '
+
+    if args is None:
+        args = sys.argv[1:]
 
     if len(args) < 1:
         print(__doc__)
@@ -365,4 +368,4 @@ def main(args):
         openUrl(config, args[0])
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main()
