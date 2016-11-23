@@ -5,6 +5,12 @@ install:
 dev:
 	pip install --user -v -e .
 
+publish-pypi:
+	rm -rf dist/
+	python setup.py sdist bdist_wheel
+	twine upload dist/*
+
+# Install without pip
 install-copy:
 	mkdir -p ~/.local/bin/
 	cp dcode/dcode.py ~/.local/bin/
