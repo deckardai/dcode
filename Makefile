@@ -5,9 +5,11 @@ install:
 dev:
 	pip install --user -v -e .
 
-publish-pypi:
-	rm -rf dist/
+build-dist:
+	rm -rf build/ dist/
 	python setup.py sdist bdist_wheel
+
+publish-pypi: build-dist
 	twine upload dist/*
 
 # Install without pip
