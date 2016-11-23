@@ -5,8 +5,9 @@ from subprocess import check_call
 
 def installMac():
     # Just opening the mac app will register the handler
-    path = pkg_resources.resource_filename("dcode", "macos/DCode.app")
-    check_call("open " + path)
+    path = pkg_resources.resource_filename("dcode", "macos/")
+    print("Installing from " + path)
+    check_call(["open", path])
 
 
 def installLinux():
