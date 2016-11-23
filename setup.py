@@ -1,23 +1,27 @@
 # -*- coding: utf-8 -*-
 
-from setuptools import setup, find_packages
+from setuptools import setup
 from setuptools.command.install import install
 from setuptools.command.develop import develop
 # To use a consistent encoding
-from codecs import open
+import codecs
 import os
 from os import path
 
-here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
-with open(path.join(here, 'README.md'), encoding='utf-8') as f:
-    long_description = f.read()
+description = 'A URL scheme to share code'
+try:
+    here = path.abspath(path.dirname(__file__))
+    with codecs.open(path.join(here, 'README.md'), encoding='utf-8') as f:
+        long_description = f.read()
+except IOError:
+    long_description = description
 
 
 def package_files(directory):
     paths = []
-    for (path, directories, filenames) in os.walk(directory):
+    for (path, _, filenames) in os.walk(directory):
         for filename in filenames:
             paths.append(os.path.join('..', path, filename))
     return paths
@@ -57,7 +61,7 @@ setup(
     # https://packaging.python.org/en/latest/single_source_version.html
     version='0.1.0',
 
-    description='A URL scheme to share code',
+    description=description,
     long_description=long_description,
 
     # The project's main homepage.
