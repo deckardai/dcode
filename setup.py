@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup, find_packages
+from setuptools.command.install import install
+from setuptools.command.develop import develop
 # To use a consistent encoding
 from codecs import open
 import os
@@ -19,6 +21,32 @@ def package_files(directory):
         for filename in filenames:
             paths.append(os.path.join('..', path, filename))
     return paths
+
+
+def post_install():
+    " Install the system URL handler "
+    # Sync PYTHONPATH after install
+    try:
+        from imp import reload
+    except ImportError:
+        pass  # Old Python
+    import site
+    reload(site)
+
+    import dcode.install
+    dcode.install.install()
+
+
+class my_install(install):
+    def run(self):
+        install.run(self)
+        self.execute(post_install, [], msg="Installing URL handler")
+
+
+class my_develop(develop):
+    def run(self):
+        develop.run(self)
+        self.execute(post_install, [], msg="Installing URL handler")
 
 
 setup(
@@ -104,6 +132,10 @@ setup(
     # http://docs.python.org/3.4/distutils/setupscript.html#installing-additional-files # noqa
     # In this case, 'data_file' will be installed into '<sys.prefix>/my_data'
     #data_files=[],
+
+    # Post install
+    cmdclass={'install': my_install,
+              'develop': my_develop},
 
     # To provide executable scripts, use entry points in preference to the
     # "scripts" keyword. Entry points provide cross-platform support and allow

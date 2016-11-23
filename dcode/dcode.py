@@ -30,7 +30,6 @@ DEV = os.environ.get('DCODE_DEV')
 
 # Add paths where editors are likely found
 os.environ['PATH'] += os.pathsep + '/usr/local/bin'
-print('PATH=' + os.environ['PATH'])
 
 
 editorCommands = {
