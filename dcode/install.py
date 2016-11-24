@@ -30,9 +30,13 @@ def installLinux():
 def install():
     if sys.platform == "darwin":
         installMac()
-    elif sys.platform == "linux":
+    elif sys.platform.startswith("linux"):
         installLinux()
     else:
         print("Platform not supported.")
         return
     print("URL handler installed")
+
+
+if __name__ == "__main__":
+    install()

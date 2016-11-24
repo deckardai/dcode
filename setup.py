@@ -59,7 +59,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.1.1',
+    version='0.1.2',
 
     description=description,
     long_description=long_description,
@@ -130,6 +130,7 @@ setup(
         "dcode": package_files("dcode/macos/") +
                  package_files("dcode/linux/"),
     },
+    zip_safe=False,
 
     # Although 'package_data' is the preferred approach, in some case you may
     # need to place data files outside of your packages. See:

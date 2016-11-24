@@ -331,15 +331,8 @@ def init():
     return config
 
 
-def main(args=None):
-    ' Command line '
-
-    if args is None:
-        args = sys.argv[1:]
-
-    if len(args) < 1:
-        print(__doc__)
-        sys.exit(1)
+def mainDcode(args=None):
+    ' Handle a URL '
 
     config = init()
     save(config)
@@ -365,6 +358,24 @@ def main(args=None):
     else:
         # Run once, from argument
         openUrl(config, args[0])
+
+
+def main(args=None):
+    ' Command line '
+
+    if args is None:
+        args = sys.argv[1:]
+
+    if len(args) < 1:
+        print(__doc__)
+        sys.exit(1)
+
+    if args[0] == 'install':
+        import dcode.install
+        dcode.install.install()
+        sys.exit(0)
+
+    mainDcode(args)
 
 if __name__ == '__main__':
     main()
