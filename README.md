@@ -2,6 +2,8 @@
 
 Dcode is a URL scheme for sharing code.
 
+    pip install --user dcode && python -m dcode install
+
 # Link-to-code
 
 A dCode URL represents a location in a codebase.
@@ -93,17 +95,14 @@ The current implementation looks for all git or mercurial repositories in the ho
 
 # Install
 
-    git clone https://github.com/deckardai/dcode.git
-    cd dcode
-
-    # For Linux
-    make install-linux test-linux
-
-    # For Mac
-    make install-mac test-mac
+    pip install --user dcode && python -m dcode install
 
 This will install the url handler and open a test file after a few seconds.
 DCode will likely select a basic text editor.
+
+If you don't have pip yet:
+
+    easy_install pip
 
 # Configure
 
@@ -111,11 +110,13 @@ DCode will likely select a basic text editor.
 
 You should now be able to click links and end up right in your text editor.
 
-Example link: [dcode://dcode/tests/some_file.txt?l=3&c=30](dcode://dcode/tests/some_file.txt?l=3&c=30)
+# Demo
 
-# Test
-    # Using line number, word and editor in this example :-)
-    python dcode.py "dcode://path/to/file/filename?l=19&w=dcode&editor=atom"
+Demo link: [dcode://_demo/demo.txt?l=3&c=30](dcode://_demo/demo.txt?l=3&c=30)
+
+Or simulating if the link is not clickable for you:
+
+    python -m dcode 'dcode://_demo/demo.txt?l=3&c=30'
 
 # Contributing
 
@@ -123,8 +124,14 @@ Ideas and bug reports are welcome in *Issues*, or code as pull requests.
 
 Examples:
 
-* Adding support for a new editor.
+* Editor plugins generating URLs.
 
 * Make something more robust in a particular environment.
 
 * Make URLs more robust to code changes, multiple branches, and such.
+
+## Development setup:
+
+    git clone https://github.com/deckardai/dcode.git
+    cd dcode
+    pip install --user -e .

@@ -128,7 +128,8 @@ setup(
     # have to be included in MANIFEST.in as well.
     package_data={
         "dcode": package_files("dcode/macos/") +
-                 package_files("dcode/linux/"),
+                 package_files("dcode/linux/") +
+                 ["demo.txt"],
     },
     zip_safe=False,
 
@@ -139,8 +140,8 @@ setup(
     #data_files=[],
 
     # Post install
-    cmdclass={'install': my_install,
-              'develop': my_develop},
+    #cmdclass={'install': my_install,
+    #          'develop': my_develop},
 
     # To provide executable scripts, use entry points in preference to the
     # "scripts" keyword. Entry points provide cross-platform support and allow

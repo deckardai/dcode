@@ -143,6 +143,10 @@ def sortReposForName(roots, name):
 
 def findRepoWithPath(path, repoName=None):
     ' Find a repo that contains this path. '
+
+    if repoName == "_demo":
+        return os.path.dirname(os.path.realpath(__file__))
+
     roots = collectRepos()
     if repoName:
         roots = sortReposForName(roots, repoName)
@@ -370,12 +374,13 @@ def main(args=None):
         print(__doc__)
         sys.exit(1)
 
-    if args[0] == 'install':
-        import dcode.install
-        dcode.install.install()
+    elif args[0] == 'install':
+        from . import install
+        install.install()
         sys.exit(0)
 
-    mainDcode(args)
+    else:
+        mainDcode(args)
 
 if __name__ == '__main__':
     main()
