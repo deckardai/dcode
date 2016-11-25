@@ -7,7 +7,7 @@ dev:
 
 build-dist:
 	rm -rf build/ dist/
-	python setup.py sdist
+	python setup.py sdist bdist_wheel
 
 publish-pypi: build-dist
 	twine upload dist/*

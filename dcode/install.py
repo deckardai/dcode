@@ -6,9 +6,10 @@ from subprocess import check_call
 
 def installMac():
     # Just opening the mac app will register the handler
-    path = pkg_resources.resource_filename("dcode", "macos/")
+    path = pkg_resources.resource_filename("dcode", "macos/DCode.app/Contents/MacOS/applet")
     print("Installing from " + path)
-    check_call(["open", path])
+    print("\nYou should see a confirmation dialog.")
+    check_call([path])
 
 
 def installLinux():
@@ -35,7 +36,14 @@ def install():
     else:
         print("Platform not supported.")
         return
-    print("URL handler installed")
+    print(
+        "\n"
+        "URL handler installed. \n"
+        "Try to click the following link using Ctrl or Cmd: \n"
+        "\n"
+        "    dcode://_demo/demo.txt?l=3&c=30 \n"
+        "\n"
+    )
 
 
 if __name__ == "__main__":
