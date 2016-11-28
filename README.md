@@ -112,7 +112,7 @@ You should now be able to click links and end up right in your text editor.
 
 # Demo
 
-Demo link: [dcode://_demo/demo.txt?l=3&c=30](dcode://_demo/demo.txt?l=3&c=30)
+Demo link: [dcode://_demo/demo.txt?l=3&c=30](http://dcode.online/_demo/demo.txt?l=3&c=30)
 
 Or simulating if the link is not clickable for you:
 
