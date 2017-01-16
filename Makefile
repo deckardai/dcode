@@ -1,9 +1,9 @@
 
 install:
-	pip install --user -v --upgrade .
+	pip2 install --user -v --upgrade .
 
 dev:
-	pip install --user -v -e .
+	pip2 install --user -v -e .
 
 build-dist:
 	rm -rf build/ dist/
@@ -27,7 +27,7 @@ install-mac: install-copy
 	open dcode/macos/DCode.app
 
 test-linux:
-	xdg-open 'dcode://dcode/tests/some_file.txt?l=3\\&c=30'
+	xdg-open 'dcode://_demo/dcode/demo.txt?l=3\\&c=30'
 
 test-mac:
-	open 'dcode://dcode/tests/some_file.txt?l=3&c=30'
+	open 'dcode://_demo/dcode/demo.txt?l=3&c=30'

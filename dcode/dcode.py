@@ -6,10 +6,11 @@ dCode handles urls like this:
 
     dcode.py dcode://my_project/some/path.py?l=1&c=1
 '''
-
 import sys
 import os
 from os.path import join, exists, basename, expanduser
+from glob import iglob
+from itertools import chain
 from subprocess import check_call
 try:
     from urlparse import urlparse, parse_qs
@@ -29,21 +30,71 @@ CONFIG_DEFAULTS = {
 DEV = os.environ.get('DCODE_DEV')
 
 # Add paths where editors are likely found
+if 'PATH' not in os.environ:
+    os.environ['PATH'] = '/usr/bin'
 os.environ['PATH'] += os.pathsep + '/usr/local/bin'
+PATHS = list(filter(None, os.environ['PATH'].split(os.pathsep)))
+
+
+def findExecutable(candidates):
+    " Search everywhere for an executable name or path from the candidate list. "
+    for name in candidates:
+        if name.startswith("/"):
+            # An absolute path with wilcard
+            cmds = iglob(name)
+            if name.startswith("/Applications/"):
+                # Check the $HOME/Applications first
+                cmds = chain(iglob(HOME + name), cmds)
+        else:
+            # A script name in one the PATHS
+            cmds = [join(path, name) for path in PATHS]
+
+        for cmd in cmds:
+            # Exists and is executable?
+            if os.access(cmd, os.X_OK):
+                return cmd
+
+    return None
 
 
 editorCommands = {
-    # IntelliJ editors
-    'androidstudio': "studio '{pathLine}'",
-    'appcode': "appcode '{pathLine}'",
-    'clion': "clion '{pathLine}'",
-    'idea': "idea '{pathLine}'",
-    'phpstorm': "pstorm '{pathLine}'",
-    'pycharm': "charm '{pathLine}'",
-    'rubymine': "mine '{pathLine}'",
-    'webstorm': "wstorm '{pathLine}'",
-    'xcode': "open -a xcode --args '{path}'",
+    "xcode": "open -a xcode --args '{path}'",
 }
+
+# IntelliJ editors
+# Try all the common names and locations
+
+intellijExecNames = {
+    "androidstudio": [ "studio", "/Applications/Android Studio*.app/Contents/MacOS/studio"],
+    "appcode": ["appcode", "/Applications/AppCode*.app/Contents/MacOS/AppCode"],
+    "clion": ["clion", "/Applications/CLion*.app/Contents/MacOS/clion"],
+    "idea": ["idea", "/Applications/IntelliJ IDEA*.app/Contents/MacOS/idea"],
+    "phpstorm": ["phpstorm", "pstorm", "/Applications/PhpStorm*.app/Contents/MacOS/phpstorm"],
+    "pycharm": ["pycharm", "charm", "/Applications/PyCharm*.app/Contents/MacOS/pycharm"],
+    "rubymine": ["rubymine", "mine", "/Applications/RubyMine*.app/Contents/MacOS/rubymine"],
+    "webstorm": ["webstorm", "wstorm", "/Applications/WebStorm*.app/Contents/MacOS/webstorm"],
+}
+
+# Auto-detect the launcher location
+def renderIntellijCommand(editor='', **variables):
+    editor = editor.split(':')[0]
+    execNames = intellijExecNames[editor]
+    execPath = findExecutable(execNames)
+    if not execPath:
+        return None
+    cmd = "'{execPath}' --line '{line}' '{path}'".format(
+        execPath=execPath,
+        **variables
+    )
+    if ".app" in execPath:
+        # Launch the main app in the background and return
+        cmd += " &"
+    return cmd
+
+# Register them all
+for ed in intellijExecNames.keys():
+    editorCommands[ed] = renderIntellijCommand
+
 
 # Vim
 def renderVimCommand(editor='', **variables):
@@ -291,6 +342,9 @@ def openUrl(config, url):
         print('E Not found')
     else:
         cmd = makeEditorCommand(config, location)
+        if not cmd:
+            print('E No editor launcher found')
+            return
         prefix = 'echo ' if DEV else ''
         check_call(prefix + cmd, shell=True)
 
@@ -306,7 +360,7 @@ def load():
         with open(CONFIG_FILE) as fd:
             config.update(json.load(fd))
     except Exception as e:
-        warning(repr(e)[:500])
+        warning("No config file at %s (%s)", CONFIG_FILE, str(e)[:500])
     return config
 
 
