@@ -112,9 +112,25 @@ def renderVimCommand(editor='', **variables):
     )
     return cmd
 
-editorCommands['vim'] = renderVimCommand
-editorCommands['gvim'] = renderVimCommand
-editorCommands['nvim'] = renderVimCommand
+
+def callVim(editor, path, line, column, **variables):
+    try:
+        import socket
+        client = socket.socket( socket.AF_UNIX, socket.SOCK_DGRAM )
+        address = join(HOME, ".dcode", editor + ".sock")
+        msg = {
+            "method": "openPath",
+            "params": [path, line, column],
+        }
+        client.sendto(json.dumps(msg), address)
+        return True
+    except Exception as err:
+        print(err)
+        return False
+
+editorCommands['vim'] = callVim
+editorCommands['gvim'] = callVim
+editorCommands['nvim'] = callVim
 
 # Atom, VSCode, ...
 if sys.platform == 'darwin':
@@ -345,8 +361,9 @@ def openUrl(config, url):
         if not cmd:
             print('E No editor launcher found')
             return
-        prefix = 'echo ' if DEV else ''
-        check_call(prefix + cmd, shell=True)
+        if isinstance(cmd, str):
+            prefix = 'echo ' if DEV else ''
+            check_call(prefix + cmd, shell=True)
 
 
 def testOpen():
