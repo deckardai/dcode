@@ -122,7 +122,7 @@ def callVim(editor, path, line, column, **variables):
             "method": "openPath",
             "params": [path, line, column],
         }
-        client.sendto(json.dumps(msg), address)
+        client.sendto(json.dumps(msg).encode(), address)
         return True
     except Exception as err:
         print(err)
