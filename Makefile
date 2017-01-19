@@ -27,7 +27,7 @@ install-mac: install-copy
 	open dcode/macos/DCode.app
 
 test-linux:
-	xdg-open 'dcode://_demo/dcode/demo.txt?l=3\\&c=30'
+	xdg-open 'dcode://_demo/demo.txt?l=3&c=30'
 
 test-mac:
-	open 'dcode://_demo/dcode/demo.txt?l=3&c=30'
+	open 'dcode://_demo/demo.txt?l=3&c=30'

@@ -59,6 +59,8 @@ def findExecutable(candidates):
 
 editorCommands = {
     "xcode": "open -a xcode --args '{path}'",
+    # TODO Support mac
+    "sublime": "/opt/sublime_text/sublime_text --add '{pathLineColumn}'",
 }
 
 # IntelliJ editors
