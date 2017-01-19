@@ -59,8 +59,6 @@ def findExecutable(candidates):
 
 editorCommands = {
     "xcode": "open -a xcode --args '{path}'",
-    # TODO Support mac
-    "sublime": "/opt/sublime_text/sublime_text --add '{pathLineColumn}'",
 }
 
 # IntelliJ editors
@@ -96,6 +94,26 @@ def renderIntellijCommand(editor='', **variables):
 # Register them all
 for ed in intellijExecNames.keys():
     editorCommands[ed] = renderIntellijCommand
+
+
+# Sublime Text
+sublimeExecNames = [
+    "subl", # In PATH
+    join(HOME, "bin/subl"), # As documented by Sublime
+    "/Applications/Sublime Text*.app/Contents/SharedSupport/bin/subl", # Default on mac
+    "/opt/sublime_text/sublime_text", # Default on linux
+]
+
+def renderSublimeCommand(**variables):
+    execPath = findExecutable(sublimeExecNames)
+    if not execPath:
+        return None
+    return "'{execPath}' --add '{pathLineColumn}'".format(
+        execPath=execPath,
+        **variables
+    )
+
+editorCommands["sublime"] = renderSublimeCommand
 
 
 # Vim
