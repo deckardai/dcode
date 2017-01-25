@@ -252,7 +252,18 @@ def findRepoFromUrl(url):
     # Parse url and parameters
     purl = urlparse(url)
     params = parse_qs(purl.query)
+    repo = purl.hostname
     path = purl.path.strip('/')
+
+    # Extract repo and path from github.com org/repo/path
+    if repo == 'github.com' or repo == 'bitbucket.org':
+        repoStart = path.find("/") + 1
+        repoEnd = path.find("/", repoStart)
+        if repoEnd < 0:
+            repoEnd = len(path)
+        # Split the path
+        repo = path[repoStart:repoEnd]
+        path = path[repoEnd+1:]  # Skip the slash
 
     root = None
     # Try the root from the url
@@ -266,7 +277,7 @@ def findRepoFromUrl(url):
     if root is None:
         root = findRepoWithPath(
             path=path,
-            repoName=purl.hostname,
+            repoName=repo,
         )
     # Not found
     if root is None:
