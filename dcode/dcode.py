@@ -264,6 +264,10 @@ def findRepoFromUrl(url):
         # Split the path
         repo = path[repoStart:repoEnd]
         path = path[repoEnd+1:]  # Skip the slash
+        # Remove blob/master/ if present
+        if path.startswith("blob/"):  # len=5
+            pathStart = path.find("/", 5) + 1
+            path = path[pathStart:]
 
     root = None
     # Try the root from the url
