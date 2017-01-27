@@ -59,8 +59,6 @@ def findExecutable(candidates):
 
 editorCommands = {
     "xcode": "open -a xcode --args '{path}'",
-    # TODO Support mac
-    "sublime": "/opt/sublime_text/sublime_text --add '{pathLineColumn}'",
 }
 
 # IntelliJ editors
@@ -96,6 +94,26 @@ def renderIntellijCommand(editor='', **variables):
 # Register them all
 for ed in intellijExecNames.keys():
     editorCommands[ed] = renderIntellijCommand
+
+
+# Sublime Text
+sublimeExecNames = [
+    "subl", # In PATH
+    join(HOME, "bin/subl"), # As documented by Sublime
+    "/Applications/Sublime Text*.app/Contents/SharedSupport/bin/subl", # Default on mac
+    "/opt/sublime_text/sublime_text", # Default on linux
+]
+
+def renderSublimeCommand(**variables):
+    execPath = findExecutable(sublimeExecNames)
+    if not execPath:
+        return None
+    return "'{execPath}' --add '{pathLineColumn}'".format(
+        execPath=execPath,
+        **variables
+    )
+
+editorCommands["sublime"] = renderSublimeCommand
 
 
 # Vim
@@ -250,7 +268,22 @@ def findRepoFromUrl(url):
     # Parse url and parameters
     purl = urlparse(url)
     params = parse_qs(purl.query)
+    repo = purl.hostname
     path = purl.path.strip('/')
+
+    # Extract repo and path from github.com org/repo/path
+    if repo == 'github.com' or repo == 'bitbucket.org':
+        repoStart = path.find("/") + 1
+        repoEnd = path.find("/", repoStart)
+        if repoEnd < 0:
+            repoEnd = len(path)
+        # Split the path
+        repo = path[repoStart:repoEnd]
+        path = path[repoEnd+1:]  # Skip the slash
+        # Remove blob/master/ if present
+        if path.startswith("blob/"):  # len=5
+            pathStart = path.find("/", 5) + 1
+            path = path[pathStart:]
 
     root = None
     # Try the root from the url
@@ -264,7 +297,7 @@ def findRepoFromUrl(url):
     if root is None:
         root = findRepoWithPath(
             path=path,
-            repoName=purl.hostname,
+            repoName=repo,
         )
     # Not found
     if root is None:
